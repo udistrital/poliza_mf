@@ -1,6 +1,6 @@
 # poliza_mf
 
-Cliente para la gestión, registro, actualización y consulta de contratos, parte del sistema de gestion de contratación y compras (ARGO). Este proyecto está desarrollado con Angular.
+Cliente para la gestión, registro, actualización de pólizas, parte del sistema de gestion de contratación y compras (ARGO). Este proyecto está desarrollado con Angular.
 
 ## Especificaciones Técnicas
 
