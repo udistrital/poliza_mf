@@ -33,7 +33,7 @@
               "libraryName": "poliza_mf",
               "libraryTarget": "umd"
             },
-            "deployUrl": "http://localhost:4202/"
+            "deployUrl": "http://localhost:4201/"
           },
           "configurations": {
             "production": {

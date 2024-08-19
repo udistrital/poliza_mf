@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { RegistroActasComponent } from './modules/registro-polizas/registro-poliza.component';
+import { RegistroPolizaComponent } from './modules/registro-poliza/registro-poliza.component';
 
 const routes: Routes = [
   {
-    path:"registrar-contrato",
-    component: RegistroActasComponent
+    path:"registrar-poliza",
+    component: RegistroPolizaComponent
   }
 ];
 
