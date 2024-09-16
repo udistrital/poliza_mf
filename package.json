@@ -3,12 +3,12 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --port 4202",
+    "start": "ng serve --port 4203",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "build:single-spa:poliza_mf": "ng build poliza_mf --configuration production",
-    "serve:single-spa:poliza_mf": "ng s --project poliza_mf --disable-host-check --port 4201 --live-reload false"
+    "serve:single-spa:poliza_mf": "ng s --project poliza_mf --disable-host-check --port 4203 --live-reload false"
   },
   "private": true,
   "dependencies": {
