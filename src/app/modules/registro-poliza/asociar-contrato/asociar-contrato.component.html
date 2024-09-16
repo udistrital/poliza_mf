@@ -5,18 +5,19 @@
     </div>
     <div class="form-grid3">
       <mat-form-field>
-        <mat-label>Vigencia:</mat-label>
+        <mat-label>Vigencia</mat-label>
         <mat-select formControlName="vigencia">
           <mat-option *ngFor="let vigencia of vigencias" [value]="vigencia.value">
             {{vigencia.viewValue}}
           </mat-option>
         </mat-select>
       </mat-form-field>
+
       <mat-form-field>
-        <mat-label>Consecutivo Contrato:</mat-label>
-        <mat-select formControlName="cdp">
-          <mat-option *ngFor="let cdp of cdps" [value]="cdp.value">
-            {{cdp.viewValue}}
+        <mat-label>Consecutivo</mat-label>
+        <mat-select formControlName="consecutivo">
+          <mat-option *ngFor="let cons of consecutivo" [value]="cons.value">
+            {{cons.viewValue}}
           </mat-option>
         </mat-select>
       </mat-form-field>
@@ -24,5 +25,9 @@
     <div *ngIf="isLoading" class="spinner-container">
       <mat-spinner diameter="50"></mat-spinner>
     </div>
+    <ng-container *ngIf="selectedContratoId">
+      <app-datos-basicos></app-datos-basicos>
+      <app-amparo-contrato [contratoId]="selectedContratoId"></app-amparo-contrato>
+    </ng-container>
   </div>
 </form>

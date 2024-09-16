@@ -8,6 +8,7 @@ import {PolizasService} from "../../../services/polizas.service";
   styleUrls: ['./datos-basicos.component.css']
 })
 export class DatosBasicosComponent implements OnInit {
+
   polizaForm: FormGroup = this.createForm();
 
   entidadesAseguradoras: any[] = [
