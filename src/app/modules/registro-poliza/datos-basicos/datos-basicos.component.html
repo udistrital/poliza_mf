@@ -6,21 +6,21 @@
   <div class="form-row">
     <mat-form-field appearance="fill" class="full-width">
       <mat-label>Número de póliza</mat-label>
-      <input matInput formControlName="numeropoliza" required>
+      <input matInput formControlName="numero_poliza" required>
     </mat-form-field>
   </div>
 
   <div class="form-row datepicker-group">
     <mat-form-field appearance="fill">
       <mat-label>Fecha Inicial</mat-label>
-      <input matInput [matDatepicker]="pickerInicial" formControlName="fechaInicial" required>
+      <input matInput [matDatepicker]="pickerInicial" formControlName="fecha_inicio" required>
       <mat-datepicker-toggle matSuffix [for]="pickerInicial"></mat-datepicker-toggle>
       <mat-datepicker #pickerInicial></mat-datepicker>
     </mat-form-field>
 
     <mat-form-field appearance="fill">
       <mat-label>Fecha Final</mat-label>
-      <input matInput [matDatepicker]="pickerFinal" formControlName="fechaFinal" required>
+      <input matInput [matDatepicker]="pickerFinal" formControlName="fecha_fin" required>
       <mat-datepicker-toggle matSuffix [for]="pickerFinal"></mat-datepicker-toggle>
       <mat-datepicker #pickerFinal></mat-datepicker>
     </mat-form-field>
@@ -29,14 +29,14 @@
   <div class="form-row datepicker-group">
     <mat-form-field appearance="fill">
       <mat-label>Fecha Expedición</mat-label>
-      <input matInput [matDatepicker]="pickerExpedicion" formControlName="fechaExpedicion" required>
+      <input matInput [matDatepicker]="pickerExpedicion" formControlName="fecha_expedicion" required>
       <mat-datepicker-toggle matSuffix [for]="pickerExpedicion"></mat-datepicker-toggle>
       <mat-datepicker #pickerExpedicion></mat-datepicker>
     </mat-form-field>
 
     <mat-form-field appearance="fill">
       <mat-label>Fecha Aprobación</mat-label>
-      <input matInput [matDatepicker]="pickerAprobacion" formControlName="fechaAprobacion" required>
+      <input matInput [matDatepicker]="pickerAprobacion" formControlName="fecha_aprobacion" required>
       <mat-datepicker-toggle matSuffix [for]="pickerAprobacion"></mat-datepicker-toggle>
       <mat-datepicker #pickerAprobacion></mat-datepicker>
     </mat-form-field>
@@ -45,9 +45,9 @@
   <div class="form-row">
     <mat-form-field appearance="fill" class="full-width">
       <mat-label>Entidad Aseguradora</mat-label>
-      <mat-select formControlName="entidadAseguradora" required>
-        <mat-option *ngFor="let entidad of entidadesAseguradoras" [value]="entidad">
-          {{entidad}}
+      <mat-select formControlName="entidad_aseguradora_id" required>
+        <mat-option *ngFor="let entidad of entidadesAseguradoras" [value]="entidad.id">
+          {{entidad.name}}
         </mat-option>
       </mat-select>
     </mat-form-field>
@@ -60,8 +60,5 @@
     </mat-form-field>
   </div>
 
-  <div class="form-row">
-    <button mat-raised-button color="primary" type="submit" [disabled]="!polizaForm.valid">Enviar</button>
-  </div>
   </div>
 </form>

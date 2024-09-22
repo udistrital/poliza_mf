@@ -1,145 +1,156 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
-import { ParametrosService } from 'src/app/services/parametros.service';
-import { environment } from 'src/environments/environment';
+import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { FormBuilder, FormGroup, FormControl, Validators, FormArray } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
+import { PolizasService } from "../../../services/polizas.service";
+import { ParametrosService } from "../../../services/parametros.service";
+import { Subscription, forkJoin } from "rxjs";
+import { map, switchMap, catchError } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
+
+interface Amparo {
+  id: number;
+  amparoNombre: string;
+  tipo_valor_amparo_id: number;
+  suficiencia: string;
+  valor: string;
+  fecha_inicio: Date | null;
+  fecha_final: Date | null;
+}
+
+interface AmparoParametro {
+  Id: number;
+  Nombre: string;
+  CodigoAbreviacion: string;
+}
 
 @Component({
   selector: 'app-amparo-contrato',
   templateUrl: './amparo-contrato.component.html',
   styleUrls: ['./amparo-contrato.component.css'],
 })
-export class AmparoContratoComponent implements OnInit {
-  form: FormGroup;
-  amparos: any[] = [];
-  displayedColumns = ['id', 'amparo', 'suficiencia', 'descripcion'];
-  dataSource: MatTableDataSource<FormGroup>;
+export class AmparoContratoComponent implements OnInit, OnDestroy {
+  @Input() contratoId: string | null = null;
 
-  constructor(private _formBuilder: FormBuilder, private parametrosService: ParametrosService, private cdRef: ChangeDetectorRef) {
-    this.form = this._formBuilder.group({
-      filas: this._formBuilder.array([])
+  form: FormGroup;
+  amparosDisponibles: Amparo[] = [];
+  displayedColumns = ['id', 'amparo', 'tipo_valor_amparo', 'suficiencia', 'valor', 'fecha_inicio', 'fecha_final', 'acciones'];
+  dataSource: MatTableDataSource<Amparo>;
+  private subscription: Subscription = new Subscription();
+  private amparosParametros: AmparoParametro[] = [];
+
+  constructor(
+    private fb: FormBuilder,
+    private polizasService: PolizasService,
+    private parametrosService: ParametrosService,
+  ) {
+    this.form = this.fb.group({
+      amparoSeleccionado: [''],
+      amparos: this.fb.array([])
     });
-    this.dataSource = new MatTableDataSource<FormGroup>([]);
+    this.dataSource = new MatTableDataSource<Amparo>([]);
   }
 
   ngOnInit() {
-    this.agregarFila();
-    this.CargarAmparos();
+    this.loadAmparosParametros();
   }
 
-  get filasFormArray(): FormArray {
-    return this.form.get('filas') as FormArray;
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
-  crearFilaFormGroup(): FormGroup {
-    return this._formBuilder.group({
-      amparo: ['', Validators.required],
-      suficienciaPorcentaje: ['', Validators.required],
-      suficienciaSalarios: [{ value: '', disabled: true }],
-      descripcion: ['', Validators.required]
-    });
-  }
-
-  agregarFila() {
-    const nuevaFila = this.crearFilaFormGroup();
-    this.filasFormArray.push(nuevaFila);
-    this.configurarAmparoListener(nuevaFila);
-    this.actualizarDataSource();
-  }
-
-  eliminarFila(index: number) {
-    this.filasFormArray.removeAt(index);
-    this.actualizarDataSource();
-  }
-
-  actualizarDataSource() {
-    this.dataSource.data = this.filasFormArray.controls as FormGroup[];
-    this.cdRef.detectChanges();
-  }
-
-  configurarAmparoListener(filaFormGroup: FormGroup) {
-    filaFormGroup.get('amparo')?.valueChanges.subscribe((id_amparo) => {
-      if (id_amparo) {
-        const idAmparoStr = id_amparo.toString();
-        const tipoAmparoIdStr = environment.AMPARO_CREC_ID.toString();
-
-        const suficienciaPorcentajeControl = filaFormGroup.get('suficienciaPorcentaje');
-        const suficienciaSalariosControl = filaFormGroup.get('suficienciaSalarios');
-
-        if (idAmparoStr === tipoAmparoIdStr) {
-          suficienciaPorcentajeControl?.disable();
-          suficienciaPorcentajeControl?.setValue('');
-          suficienciaSalariosControl?.enable();
-          suficienciaSalariosControl?.setValidators(Validators.required);
-        } else {
-          suficienciaPorcentajeControl?.enable();
-          suficienciaPorcentajeControl?.setValidators(Validators.required);
-          suficienciaSalariosControl?.disable();
-          suficienciaSalariosControl?.setValue('');
+  private loadAmparosParametros() {
+    this.subscription.add(
+      this.parametrosService.get(`parametro?query=TipoParametroId:${environment.AMPARO_ID}&limit=0`).pipe(
+        map((response: any) => response.Data as AmparoParametro[]),
+        catchError(error => {
+          console.error('Error loading amparos parametros:', error);
+          return [];
+        })
+      ).subscribe(amparos => {
+        this.amparosParametros = amparos;
+        if (this.contratoId) {
+          this.loadAmparos();
         }
+      })
+    );
+  }
 
-        suficienciaPorcentajeControl?.updateValueAndValidity();
-        suficienciaSalariosControl?.updateValueAndValidity();
-        this.cdRef.detectChanges();
-      }
+  loadAmparos() {
+    if (!this.contratoId) return;
+
+    this.subscription.add(
+      this.polizasService.getAmparos(this.contratoId).pipe(
+        map(response => response.Data),
+        map(amparos => this.enrichAmparos(amparos)),
+        catchError(error => {
+          console.error('Error loading amparos:', error);
+          return [];
+        })
+      ).subscribe(amparos => {
+        this.amparosDisponibles = amparos;
+        this.updateForm();
+      })
+    );
+  }
+
+  private enrichAmparos(amparos: any[]): Amparo[] {
+    return amparos.map(amparo => {
+      const amparoParametro = this.amparosParametros.find(ap => ap.Id === amparo.amparo_id);
+      return {
+        ...amparo,
+        amparoNombre: amparoParametro ? amparoParametro.Nombre : 'Desconocido'
+      };
     });
   }
 
-  CargarAmparos() {
-    this.parametrosService.get('parametro?query=TipoParametroId:' + environment.AMPARO_ID + '&limit=0').subscribe((Response: any) => {
-      if (Response.Status == "200") {
-        this.amparos = Response.Data;
-      }
-    })
+  updateForm() {
+    this.amparosFormArray.clear();
+    this.dataSource.data = [];
   }
 
-  onlyNumbersFrom1To100(event: KeyboardEvent, currentValue: string) {
-    const allowedKeys = [
-      'Backspace', 'Tab', 'End', 'Home', 'ArrowLeft', 'ArrowRight', 'Delete'
-    ];
+  addAmparo() {
+    const amparoSeleccionadoId = this.form.get('amparoSeleccionado')?.value;
+    const amparoIndex = this.amparosDisponibles.findIndex(a => a.id === amparoSeleccionadoId);
 
-    if (allowedKeys.includes(event.key)) {
-      return;
-    }
-
-    const pattern = /^[0-9]$/;
-
-    if (!pattern.test(event.key)) {
-      event.preventDefault();
-      return;
-    }
-
-    let newValue = currentValue;
-    const cursorPosition = (event.target as HTMLInputElement).selectionStart;
-    if (cursorPosition !== null) {
-      newValue = currentValue.slice(0, cursorPosition) + event.key + currentValue.slice(cursorPosition);
-    } else {
-      newValue += event.key;
-    }
-
-    const numValue = parseInt(newValue, 10);
-    if (numValue < 1 || numValue > 100 || newValue.length > 3) {
-      event.preventDefault();
+    if (amparoIndex > -1) {
+      const [amparo] = this.amparosDisponibles.splice(amparoIndex, 1);
+      this.addAmparoToForm(amparo);
+      this.form.get('amparoSeleccionado')?.setValue('');
     }
   }
 
-  onlyPositiveIntegers(event: KeyboardEvent, currentValue: string) {
-    const allowedKeys = [
-      'Backspace', 'Tab', 'End', 'Home', 'ArrowLeft', 'ArrowRight', 'Delete'
-    ];
-    const pattern = /^[0-9]$/;
+  private addAmparoToForm(amparo: Amparo) {
+    console.log('addAmparoToForm:', amparo);
+    const amparoGroup = this.fb.group({
+      id: [amparo.id],
+      amparoNombre: [amparo.amparoNombre],
+      tipo_valor_amparo: [amparo.tipo_valor_amparo_id === 1 ? 'SMLV' : 'Porcentaje'],
+      suficiencia: [amparo.suficiencia],
+      valor: [amparo.valor || '', Validators.required],
+      fecha_inicio: [amparo.fecha_inicio ? new Date(amparo.fecha_inicio) : null, Validators.required],
+      fecha_final: [amparo.fecha_final ? new Date(amparo.fecha_final) : null, Validators.required]
+    });
 
-    if (!allowedKeys.includes(event.key) && !pattern.test(event.key)) {
-      event.preventDefault();
-      return;
-    }
-
-    const newValue = currentValue + event.key;
-    const numValue = parseInt(newValue, 10);
-
-    if (numValue === 0) {
-      event.preventDefault();
-    }
+    this.amparosFormArray.push(amparoGroup);
+    this.updateDataSource();
   }
 
+  removeAmparo(index: number) {
+    const removedAmparo = this.amparosFormArray.at(index).value;
+    this.amparosDisponibles.push(removedAmparo);
+    this.amparosFormArray.removeAt(index);
+    this.updateDataSource();
+  }
+
+  private updateDataSource() {
+    this.dataSource.data = this.amparosFormArray.controls.map(control => control.value);
+  }
+
+  get amparosFormArray(): FormArray {
+    return this.form.get('amparos') as FormArray;
+  }
+
+  getFormControl(index: number, controlName: string): FormControl {
+    return this.amparosFormArray.at(index).get(controlName) as FormControl;
+  }
 }
