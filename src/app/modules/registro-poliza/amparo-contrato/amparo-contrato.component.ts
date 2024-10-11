@@ -9,7 +9,7 @@ import { environment } from 'src/environments/environment';
 
 interface Amparo {
   id: number;
-  amparoNombre: string;
+  descripcion: string;
   tipo_valor_amparo_id: number;
   suficiencia: string;
   valor: string;
@@ -123,7 +123,7 @@ export class AmparoContratoComponent implements OnInit, OnDestroy {
     console.log('addAmparoToForm:', amparo);
     const amparoGroup = this.fb.group({
       id: [amparo.id],
-      amparoNombre: [amparo.amparoNombre],
+      descripcion: [amparo.descripcion],
       tipo_valor_amparo: [amparo.tipo_valor_amparo_id === 1 ? 'SMLV' : 'Porcentaje'],
       suficiencia: [amparo.suficiencia],
       valor: [amparo.valor || '', Validators.required],
