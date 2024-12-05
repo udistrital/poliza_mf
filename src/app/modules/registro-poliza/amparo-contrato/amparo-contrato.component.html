@@ -8,7 +8,7 @@
         <mat-label>Seleccionar Amparo</mat-label>
         <mat-select formControlName="amparoSeleccionado">
           <mat-option *ngFor="let amparo of amparosDisponibles" [value]="amparo.id">
-            {{amparo.amparoNombre}}
+            {{amparo.descripcion}}
           </mat-option>
         </mat-select>
       </mat-form-field>
