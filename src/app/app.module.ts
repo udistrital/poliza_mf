@@ -12,26 +12,18 @@ import { HttpClientModule } from '@angular/common/http';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-  ],
+  declarations: [AppComponent],
   imports: [
     RegistroPolizaModule,
     BrowserModule,
     BrowserAnimationsModule,
     AppRoutingModule,
     CommonModule,
-
     MatIconModule,
     HttpClientModule,
-    MatSnackBarModule
+    MatSnackBarModule,
   ],
-  providers: [
-    ParametrosService,
-    RequestManager,
-  ],
-  bootstrap: [
-    AppComponent
-  ]
+  providers: [ParametrosService, RequestManager],
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

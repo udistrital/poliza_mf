@@ -1,28 +1,32 @@
-<h1>Registrar Póliza</h1>
-<div class="border">
+<plantilla-tarjeta-contenedora
+  [title]="'Registrar Póliza'"
+  [contenido]="contenidoDePlantilla"
+></plantilla-tarjeta-contenedora>
 
-  <app-asociar-contrato />
+<ng-template #contenidoDePlantilla>
+  <div class="row">
+    <div class="col-12">
+      <app-asociar-contrato />
 
-  <div class="btn-container">
-    <button mat-raised-button color="warn">
-      Cancelar
-    </button>
-    <button mat-raised-button color="primary">
-      <mat-icon>upload</mat-icon>
-      Poliza
-    </button>
-    <button mat-raised-button color="primary">
-      <mat-icon>upload</mat-icon>
-      Registro Presupuestal
-    </button>
-    <button mat-raised-button color="primary">
-      <mat-icon>visibility</mat-icon>
-      Ver
-    </button>
-    <button mat-raised-button color="primary">
-      <mat-icon>save</mat-icon>
-      Registrar
-    </button>
+      <div class="btn-container">
+        <button mat-raised-button color="warn">Cancelar</button>
+        <button mat-raised-button color="primary">
+          <mat-icon>upload</mat-icon>
+          Poliza
+        </button>
+        <button mat-raised-button color="primary">
+          <mat-icon>upload</mat-icon>
+          Registro Presupuestal
+        </button>
+        <button mat-raised-button color="primary">
+          <mat-icon>visibility</mat-icon>
+          Ver
+        </button>
+        <button mat-raised-button color="primary">
+          <mat-icon>save</mat-icon>
+          Registrar
+        </button>
+      </div>
+    </div>
   </div>
-
-</div>
+</ng-template>

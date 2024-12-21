@@ -16,16 +16,15 @@ import { AmparoContratoComponent } from './amparo-contrato/amparo-contrato.compo
 
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
-import { MatCheckboxModule } from "@angular/material/checkbox";
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { RegistroPolizaComponent } from './registro-poliza.component';
 
 import { ParametrosService } from 'src/app/services/parametros.service';
 import { RequestManager } from 'src/app/managers/requestManager';
 import { HttpClientModule } from '@angular/common/http';
-import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
-import {DatosBasicosComponent} from "./datos-basicos/datos-basicos.component";
-
-
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { DatosBasicosComponent } from './datos-basicos/datos-basicos.component';
+import { SharedModule } from 'src/app/shared/shared.module';
 
 @NgModule({
   declarations: [
@@ -54,11 +53,9 @@ import {DatosBasicosComponent} from "./datos-basicos/datos-basicos.component";
     MatIconModule,
     MatCheckboxModule,
     HttpClientModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    SharedModule,
   ],
-  providers:[
-    ParametrosService,
-    RequestManager
-  ]
+  providers: [ParametrosService, RequestManager],
 })
-export class RegistroPolizaModule { }
+export class RegistroPolizaModule {}
