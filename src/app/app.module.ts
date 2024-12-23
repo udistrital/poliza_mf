@@ -8,30 +8,34 @@ import { RequestManager } from './managers/requestManager';
 import { RegistroPolizaModule } from './modules/registro-poliza/registro-poliza.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatIconModule } from '@angular/material/icon';
-import { HttpClientModule } from '@angular/common/http';
+import {
+  HttpClientModule,
+  provideHttpClient,
+  withInterceptors,
+} from '@angular/common/http';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { SpinnerIntercerptor } from './core/intercerptors/spinner.interceptor';
+import { SpinnerComponent } from './shared/components/spinner/spinner.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-  ],
+  declarations: [AppComponent, SpinnerComponent],
   imports: [
     RegistroPolizaModule,
     BrowserModule,
     BrowserAnimationsModule,
     AppRoutingModule,
     CommonModule,
-
     MatIconModule,
     HttpClientModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatProgressSpinnerModule,
   ],
   providers: [
     ParametrosService,
     RequestManager,
+    provideHttpClient(withInterceptors([SpinnerIntercerptor])),
   ],
-  bootstrap: [
-    AppComponent
-  ]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
