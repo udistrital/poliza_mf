@@ -1,7 +1,7 @@
 @media (max-width: 575.98px) {
   mat-form-field {
     @include mat.form-field-density(-4);
-    height: 35px;
+    height: auto;
 
     .mat-icon {
       font-size: 16px;
@@ -24,7 +24,7 @@
 @media (min-width: 576px) and (max-width: 767.98px) {
   mat-form-field {
     @include mat.form-field-density(-4);
-    height: 38px;
+    height: auto;
 
     .mat-icon {
       font-size: 17px;
@@ -47,7 +47,7 @@
 @media (min-width: 768px) and (max-width: 991.98px) {
   mat-form-field {
     @include mat.form-field-density(-4);
-    height: 42px;
+    height: auto;
 
     .mat-icon {
       font-size: 18px;
@@ -70,7 +70,7 @@
 @media (min-width: 992px) and (max-width: 1199.98px) {
   mat-form-field {
     @include mat.form-field-density(-4);
-    height: 45px;
+    height: auto;
 
     .mat-icon {
       font-size: 18px;
@@ -93,7 +93,7 @@
 @media (min-width: 1200px) {
   mat-form-field {
     @include mat.form-field-density(-3);
-    height: 48px;
+    height: auto;
 
     .mat-icon {
       font-size: 20px;

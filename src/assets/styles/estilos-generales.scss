@@ -13,6 +13,24 @@
   }
 }
 
+@media (max-width: 768px) {
+  .center-md {
+    display: flex;
+    justify-content: center !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .center-sm {
+    display: flex;
+    justify-content: center !important;
+  }
+
+  .width-100-sm {
+    width: 100%;
+  }
+}
+
 .table-container {
   width: 100%;
   overflow-x: auto;
