@@ -10,7 +10,6 @@ import { Subscription } from "rxjs";
 export class AsociarContratoComponent implements OnInit, OnDestroy {
   form!: FormGroup;
   vigencias: any[] = [
-    { value: '2023', viewValue: '2023' },
     { value: '2024', viewValue: '2024' },
     { value: '2025', viewValue: '2025' },
   ];
