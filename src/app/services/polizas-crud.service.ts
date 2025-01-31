@@ -5,7 +5,7 @@ import {Observable} from "rxjs";
 @Injectable({
   providedIn: 'root'
 })
-export class PolizasService {
+export class PolizasCrudService {
 
   constructor(private requestManager: RequestManager) {
     this.requestManager.setPath('POLIZAS_CRUD_SERVICE');
@@ -19,10 +19,5 @@ export class PolizasService {
   postAmparos(amparos: any[]): Observable<any> {
     this.requestManager.setPath('POLIZAS_CRUD_SERVICE');
     return this.requestManager.post('amparos', amparos);
-  }
-
-  getAmparos(id: string | null): Observable<any> {
-    this.requestManager.setPath('POLIZAS_CRUD_SERVICE');
-    return this.requestManager.get(`amparos/contrato/${id}`);
   }
 }

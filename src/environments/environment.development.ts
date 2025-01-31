@@ -4,6 +4,8 @@ export const environment = {
   PROVEEDORES_SERVICE: 'http://localhost:3000/',
   CDPS_SERVICE: 'http://localhost:3000/',
   POLIZAS_CRUD_SERVICE: 'http://localhost:8080/',
+  POLIZAS_MID_SERVICE: 'http://localhost:3119/',
+  GESTION_CONTRACTUAL_CRUD_SERVICE: 'http://localhost:3117/',
   TIPO_COMPROMISO_ID: '111',
   TIPO_CONTRATO_ID: '112',
   PERFIL_CONTRATISTA_ID: '113',

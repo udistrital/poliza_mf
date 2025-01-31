@@ -1,11 +1,13 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, Validators, FormArray } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
-import { PolizasService } from "../../../services/polizas.service";
+import { PolizasCrudService } from "../../../services/polizas-crud.service";
 import { ParametrosService } from "../../../services/parametros.service";
 import { Subscription, forkJoin } from "rxjs";
 import { map, switchMap, catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import {MatSnackBar} from "@angular/material/snack-bar";
+import {PolizasMidService} from "../../../services/polizas-mid.service";
 
 interface Amparo {
   id: number;
@@ -15,6 +17,7 @@ interface Amparo {
   valor: string;
   fecha_inicio: Date | null;
   fecha_final: Date | null;
+  amparo: string | null;
 }
 
 interface AmparoParametro {
@@ -29,7 +32,16 @@ interface AmparoParametro {
   styleUrls: ['./amparo-contrato.component.css'],
 })
 export class AmparoContratoComponent implements OnInit, OnDestroy {
-  @Input() contratoId: string | null = null;
+  @Input() set contratoId(value: string | null) {
+    this._contratoId = value;
+    if (value) {
+      this.loadAmparosParametros();
+    }
+  }
+  get contratoId(): string | null {
+    return this._contratoId;
+  }
+  private _contratoId: string | null = null;
 
   form: FormGroup;
   amparosDisponibles: Amparo[] = [];
@@ -40,8 +52,9 @@ export class AmparoContratoComponent implements OnInit, OnDestroy {
 
   constructor(
     private fb: FormBuilder,
-    private polizasService: PolizasService,
+    private polizasMidService: PolizasMidService,
     private parametrosService: ParametrosService,
+    private snackBar: MatSnackBar
   ) {
     this.form = this.fb.group({
       amparoSeleccionado: [''],
@@ -50,20 +63,13 @@ export class AmparoContratoComponent implements OnInit, OnDestroy {
     this.dataSource = new MatTableDataSource<Amparo>([]);
   }
 
-  ngOnInit() {
-    this.loadAmparosParametros();
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
-  }
-
   private loadAmparosParametros() {
     this.subscription.add(
       this.parametrosService.get(`parametro?query=TipoParametroId:${environment.AMPARO_ID}&limit=0`).pipe(
         map((response: any) => response.Data as AmparoParametro[]),
         catchError(error => {
           console.error('Error loading amparos parametros:', error);
+          this.showErrorMessage('Error al cargar los parámetros de amparos');
           return [];
         })
       ).subscribe(amparos => {
@@ -79,11 +85,26 @@ export class AmparoContratoComponent implements OnInit, OnDestroy {
     if (!this.contratoId) return;
 
     this.subscription.add(
-      this.polizasService.getAmparos(this.contratoId).pipe(
-        map(response => response.Data),
-        map(amparos => this.enrichAmparos(amparos)),
+      this.polizasMidService.getAmparos(this.contratoId).pipe(
+        map(response => {
+          if (!response.Data || response.Data.length === 0) {
+            throw new Error('NO_AMPAROS');
+          }
+          return response.Data;
+        }),
         catchError(error => {
           console.error('Error loading amparos:', error);
+
+          if (error.status === 404 || error.status === 400 || error.message === 'NO_AMPAROS') {
+            this.showErrorMessage(
+              `No se encontraron amparos para el contrato con ID ${this.contratoId}, ` +
+              'por favor completa ese paso en el módulo de registrar contrato'
+            );
+          } else {
+            this.showErrorMessage('Error al cargar los amparos del contrato');
+          }
+
+          this.updateForm();
           return [];
         })
       ).subscribe(amparos => {
@@ -93,13 +114,12 @@ export class AmparoContratoComponent implements OnInit, OnDestroy {
     );
   }
 
-  private enrichAmparos(amparos: any[]): Amparo[] {
-    return amparos.map(amparo => {
-      const amparoParametro = this.amparosParametros.find(ap => ap.Id === amparo.amparo_id);
-      return {
-        ...amparo,
-        amparoNombre: amparoParametro ? amparoParametro.Nombre : 'Desconocido'
-      };
+  private showErrorMessage(message: string) {
+    this.snackBar.open(message, 'Cerrar', {
+      duration: 5000,
+      horizontalPosition: 'center',
+      verticalPosition: 'top',
+      panelClass: ['error-snackbar']
     });
   }
 
@@ -120,7 +140,6 @@ export class AmparoContratoComponent implements OnInit, OnDestroy {
   }
 
   private addAmparoToForm(amparo: Amparo) {
-    console.log('addAmparoToForm:', amparo);
     const amparoGroup = this.fb.group({
       id: [amparo.id],
       descripcion: [amparo.descripcion],
@@ -128,7 +147,8 @@ export class AmparoContratoComponent implements OnInit, OnDestroy {
       suficiencia: [amparo.suficiencia],
       valor: [amparo.valor || '', Validators.required],
       fecha_inicio: [amparo.fecha_inicio ? new Date(amparo.fecha_inicio) : null, Validators.required],
-      fecha_final: [amparo.fecha_final ? new Date(amparo.fecha_final) : null, Validators.required]
+      fecha_final: [amparo.fecha_final ? new Date(amparo.fecha_final) : null, Validators.required],
+      amparo: [amparo.amparo || '', Validators.required],
     });
 
     this.amparosFormArray.push(amparoGroup);
@@ -152,5 +172,13 @@ export class AmparoContratoComponent implements OnInit, OnDestroy {
 
   getFormControl(index: number, controlName: string): FormControl {
     return this.amparosFormArray.at(index).get(controlName) as FormControl;
+  }
+
+  ngOnInit() {
+    this.loadAmparosParametros();
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 }

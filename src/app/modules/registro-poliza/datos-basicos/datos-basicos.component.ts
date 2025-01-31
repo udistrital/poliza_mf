@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import {PolizasService} from "../../../services/polizas.service";
+import {PolizasCrudService} from "../../../services/polizas-crud.service";
 
 @Component({
   selector: 'app-datos-basicos',
@@ -26,7 +26,7 @@ export class DatosBasicosComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private polizasService: PolizasService
+    private polizasService: PolizasCrudService
   ) {}
 
   ngOnInit() {
