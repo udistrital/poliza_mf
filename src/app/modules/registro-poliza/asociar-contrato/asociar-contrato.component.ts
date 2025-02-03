@@ -1,6 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from "rxjs";
+import { MatSnackBar } from '@angular/material/snack-bar';
+import {GestionContractualService} from "../../../services/gestionContractual.service";
 
 @Component({
   selector: 'app-asociar-contrato',
@@ -10,23 +12,24 @@ import { Subscription } from "rxjs";
 export class AsociarContratoComponent implements OnInit, OnDestroy {
   form!: FormGroup;
   vigencias: any[] = [
-    { value: '2023', viewValue: '2023' },
     { value: '2024', viewValue: '2024' },
     { value: '2025', viewValue: '2025' },
   ];
-  consecutivo: any[] = [
-    { value: '1234', viewValue: '1234' },
-  ];
+  consecutivo: any[] = [];
   isLoading = false;
-  private subscription: Subscription | null = null;
+  private subscriptions: Subscription[] = [];
   selectedContratoId: string | null = null;
+  hasError = false;
 
   constructor(
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private gestionContractualService: GestionContractualService,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit() {
     this.initForm();
+    this.setupVigenciaSubscription();
   }
 
   private initForm() {
@@ -37,20 +40,72 @@ export class AsociarContratoComponent implements OnInit, OnDestroy {
 
     const consecutivoControl = this.form.get('consecutivo');
     if (consecutivoControl) {
-      this.subscription = consecutivoControl.valueChanges.subscribe(value => {
-        if (value) {
-          console.log('Contrato ID seleccionado:', value);
-          this.selectedContratoId = value.toString();
-        } else {
-          this.selectedContratoId = null;
-        }
-      });
+      this.subscriptions.push(
+        consecutivoControl.valueChanges.subscribe(value => {
+          this.hasError = false;
+          if (value) {
+            console.log('Contrato ID seleccionado:', value);
+            this.selectedContratoId = value.toString();
+          } else {
+            this.selectedContratoId = null;
+          }
+        })
+      );
     }
   }
 
-  ngOnDestroy() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
+  private setupVigenciaSubscription() {
+    const vigenciaControl = this.form.get('vigencia');
+    if (vigenciaControl) {
+      this.subscriptions.push(
+        vigenciaControl.valueChanges.subscribe(value => {
+          if (value) {
+            this.loadContratos(value);
+          } else {
+            this.consecutivo = [];
+            this.form.get('consecutivo')?.setValue('');
+            this.hasError = false;
+          }
+        })
+      );
     }
+  }
+
+  private loadContratos(year: string) {
+    this.isLoading = true;
+    this.consecutivo = [];
+    this.form.get('consecutivo')?.setValue('');
+    this.hasError = false;
+
+    this.gestionContractualService.getContratosPorVigencia(year).subscribe({
+      next: (response) => {
+        if (response.Success && response.Data) {
+          this.consecutivo = response.Data.map((id: number) => ({
+            value: id.toString(),
+            viewValue: id.toString()
+          }));
+        }
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error al cargar contratos:', error);
+        this.isLoading = false;
+        this.hasError = true;
+        this.showErrorMessage(error.message || 'Error al cargar los contratos');
+      }
+    });
+  }
+
+  private showErrorMessage(message: string) {
+    this.snackBar.open(message, 'Cerrar', {
+      duration: 5000,
+      horizontalPosition: 'center',
+      verticalPosition: 'top',
+      panelClass: ['error-snackbar']
+    });
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 }
